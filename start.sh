@@ -1,16 +1,21 @@
-#!/data/data/com.termux/files/usr/bin/bash
+#!/bin/bash
+echo "Iniciando servidor Flask..."
+python3 server.py &
 
-echo "▶️ Iniciando servidor Flask..."
-python server.py &
-
-# Espera unos segundos para que Flask arranque
 sleep 5
 
-echo "🌐 Abriendo túnel con Cloudflared..."
-cloudflared tunnel --url http://localhost:5000 &
+echo "Abriendo túnel con Cloudflared..."
+URL=$(cloudflared tunnel --no-tls-verify --url http://localhost:5000 --loglevel debug | grep -i "trycloudflare.com" | awk '{print $NF}')
 
-# Espera unos segundos para que Cloudflared genere la URL
-sleep 5
+echo ""
+echo "==============================================="
+echo "   ENLACE PÚBLICO: $URL"
+echo "==============================================="
+echo ""
 
-echo "👀 Monitoreando intentos en logs/access.log..."
-tail -f logs/access.log
+echo "==============================================="
+echo "   INTENTOS EN VIVO (logs/access.log)"
+echo "   También se guardan en intentos.txt"
+echo "==============================================="
+# Mostrar en vivo y guardar en intentos.txt
+tail -f logs/access.log | tee -a intentos.txt
